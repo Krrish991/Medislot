@@ -1,0 +1,32 @@
+# Maven / Java build output
+medislot-backend/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Spring Boot local runtime files
+*.log
+*.hprof
+hs_err_pid*
+
+# Local environment and configuration overrides
+.env
+.env.*
+!.env.example
+application-local.properties
+application-local.yml
+application-local.yaml
+
+# IDE and editor settings
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
