@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediSlot | Create Account</title>
+
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+  <main class="register-page">
+    <div class="container py-4 py-lg-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-xl-9">
+
+          <section class="register-card" aria-labelledby="registerTitle">
+            <div class="register-header">
+              <a href="login.html" class="back-link">← Back to login</a>
+              <div class="brand-icon">+</div>
+              <h1 id="registerTitle">Create your MediSlot account</h1>
+              
+            </div>
+
+            <div id="messageBox" class="alert d-none" role="alert" aria-live="polite"></div>
+
+            <form id="registerForm" novalidate>
+              <!-- Role -->
+              <fieldset class="mb-4">
+                <legend class="section-title">Account type</legend>
+
+                <div class="row g-3 role-row">
+                  <div class="col-12 col-md-6">
+                    <input class="btn-check" type="radio" name="role" id="patientRole" value="PATIENT" checked>
+                    <label class="role-card" for="patientRole">
+                      <span class="role-icon">P</span>
+                      <span>
+                        <strong>Patient</strong>
+                        <small>Search doctors, book appointments, review doctors and manage favourites.</small>
+                      </span>
+                    </label>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <input class="btn-check" type="radio" name="role" id="doctorRole" value="DOCTOR">
+                    <label class="role-card" for="doctorRole">
+                      <span class="role-icon">D</span>
+                      <span>
+                        <strong>Doctor</strong>
+                        <small>Manage your doctor profile, clinic schedule and appointments.</small>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </fieldset>
+
+              <!-- Common user fields -->
+              <div class="section-title">Basic information</div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label for="name" class="form-label">Full name <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    id="name"
+                    name="name"
+                    maxlength="100"
+                    autocomplete="name"
+                    placeholder="Enter your full name"
+                    required
+                  >
+                  <div class="invalid-feedback">Name is required.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label for="email" class="form-label">Email address <span class="required">*</span></label>
+                  <input
+                    type="email"
+                    class="form-control form-control-lg"
+                    id="email"
+                    name="email"
+                    maxlength="254"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                  >
+                  <div class="invalid-feedback">Enter a valid email address.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label for="password" class="form-label">Password <span class="required">*</span></label>
+                  <div class="password-wrap">
+                    <input
+                      type="password"
+                      class="form-control form-control-lg"
+                      id="password"
+                      name="password"
+                      minlength="8"
+                      autocomplete="new-password"
+                      placeholder="Create a strong password"
+                      required
+                    >
+                    <button type="button" id="togglePassword" class="password-toggle" aria-label="Show password">Show</button>
+                  </div>
+                  <div class="invalid-feedback" id="passwordFeedback">Password must be at least 8 characters.</div>
+                  <div class="password-rules" id="passwordRules">
+                    <span data-rule="length">8+ characters</span>
+                    <span data-rule="upper">Uppercase</span>
+                    <span data-rule="lower">Lowercase</span>
+                    <span data-rule="number">Number</span>
+                    <span data-rule="special">Special character</span>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label for="confirmPassword" class="form-label">Confirm password <span class="required">*</span></label>
+                  <input
+                    type="password"
+                    class="form-control form-control-lg"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    placeholder="Re-enter your password"
+                    required
+                  >
+                  <div class="invalid-feedback">Passwords do not match.</div>
+                </div>
+              </div>
+
+              <!-- Password recovery -->
+              <section class="security-section" aria-labelledby="securityTitle">
+                <div class="section-title" id="securityTitle">Password recovery</div>
+                <p class="section-help">Choose a security question.</p>
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label for="securityQuestion" class="form-label">Security question <span class="required">*</span></label>
+                    <select id="securityQuestion" name="securityQuestion" class="form-select form-select-lg" required>
+                      <option value="">Select a security question</option>
+                      <option value="What is your mother's maiden name?">What is your mother name?</option>
+                      <option value="What was the name of your first school?">What was the name of school?</option>
+                      <option value="What is the name of your childhood best friend?">What is the name of your childhood best friend?</option>
+                      <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                      <option value="What is your favourite childhood place?">What is your favourite childhood place?</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a security question.</div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label for="securityAnswer" class="form-label">Security answer <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="securityAnswer"
+                      name="securityAnswer"
+                      maxlength="255"
+                      autocomplete="off"
+                      placeholder="Enter your answer"
+                      required
+                    >
+                    <div class="invalid-feedback">Security answer is required.</div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Doctor-only fields -->
+              <section id="doctorFields" class="doctor-section d-none" aria-labelledby="doctorDetailsTitle">
+                <div class="section-title" id="doctorDetailsTitle">Doctor details</div>
+                <p class="section-help">
+                  
+                  A doctor is created as <strong>unverified</strong> until an administrator approves the account.
+                </p>
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label for="clinicId" class="form-label">Clinic <span class="required">*</span></label>
+                    <select id="clinicId" name="clinicId" class="form-select form-select-lg">
+                      <option value="">Loading clinics...</option>
+                    </select>
+                    <div class="invalid-feedback">Please select a clinic.</div>
+                    <div class="form-text" id="clinicStatus">Clinics are loaded from the MediSlot backend.</div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label for="specialization" class="form-label">Specialization <span class="required">*</span></label>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="specialization"
+                      maxlength="100"
+                      placeholder="e.g. General Physician"
+                    >
+                    <div class="invalid-feedback">Specialization is required.</div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label for="qualification" class="form-label">Qualification <span class="required">*</span> </label>
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      id="qualification"
+                      maxlength="150"
+                      placeholder="e.g. MBBS, MD"
+                    >
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <label for="experienceYears" class="form-label">Experience (years) <span class="required">*</span></label>
+                    <input
+                      type="number"
+                      class="form-control form-control-lg"
+                      id="experienceYears"
+                      min="0"
+                      max="80"
+                      step="1"
+                      placeholder="0"
+                    >
+                  </div>
+
+                  <div class="col-12 col-md-3">
+                    <label for="consultationFee" class="form-label">Consultation fee <span class="required">*</span></label>
+                    <input
+                      type="number"
+                      class="form-control form-control-lg"
+                      id="consultationFee"
+                      min="0"
+                      step="0.01"
+                      placeholder="500"
+                    >
+                  </div>
+                </div>
+              </section>
+
+              <div class="submit-area">
+                <button type="submit" id="registerButton" class="btn btn-primary btn-lg">
+                  <span id="buttonText">Create account</span>
+                  <span id="buttonSpinner" class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                </button>
+              </div>
+            </form>
+
+            <div class="login-footer">
+              Already have an account?
+              <a href="login.html">Login here</a>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/register.js"></script>
+</body>
+</html>
