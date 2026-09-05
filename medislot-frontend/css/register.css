@@ -1,0 +1,241 @@
+/* MediSlot Step 2 — Registration */
+
+.register-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.07), transparent 30rem),
+    #f4f7fb;
+}
+
+.register-card {
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(20, 35, 60, 0.10);
+  padding: 30px;
+}
+
+.register-header {
+  text-align: center;
+  padding: 4px 0 24px;
+  position: relative;
+}
+
+.register-header .back-link {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.register-header h1 {
+  margin: 12px 0 6px;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.register-header p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.register-header .brand-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 31px;
+  font-weight: 700;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #172033;
+}
+
+.section-help {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: -4px 0 18px;
+}
+
+.required {
+  color: #dc3545;
+}
+
+.role-card {
+  min-height: 92px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #dbe2ea;
+  border-radius: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.role-card:hover {
+  border-color: #8aaef8;
+}
+
+.btn-check:checked + .role-card {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.role-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.role-card strong,
+.role-card small {
+  display: block;
+}
+
+.role-card small {
+  margin-top: 4px;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.form-label {
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.form-control,
+.form-select {
+  min-height: 52px;
+  border-color: #dbe2ea;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap .form-control {
+  padding-right: 74px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 4px;
+}
+
+.password-rules {
+  min-height: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 7px;
+}
+
+.password-rules span {
+  padding: 3px 7px;
+  border: 1px solid #dbe2ea;
+  border-radius: 999px;
+  color: #7a8494;
+  font-size: 0.72rem;
+}
+
+.password-rules span.valid {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.doctor-section {
+  margin-top: 30px;
+  padding: 22px;
+  border: 1px solid #dbe2ea;
+  border-radius: 14px;
+  background: #fafcff;
+}
+
+.submit-area {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid #e9edf2;
+}
+
+.submit-area .btn {
+  min-width: 210px;
+  min-height: 52px;
+  font-weight: 700;
+}
+
+.login-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e9edf2;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.login-footer a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+  .register-card {
+    padding: 24px 18px;
+    border-radius: 15px;
+  }
+
+  .register-header {
+    padding-top: 32px;
+  }
+
+  .register-header .back-link {
+    top: 0;
+  }
+
+  .submit-area {
+    justify-content: stretch;
+  }
+
+  .submit-area .btn {
+    width: 100%;
+  }
+}
