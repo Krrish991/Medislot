@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediSlot | Patient Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/patient-dashboard.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+    <div class="container-fluid dashboard-container">
+      <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="patient-dashboard.html">
+        <span class="mini-brand">+</span>
+        MediSlot
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#patientNav"
+              aria-controls="patientNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="patientNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="#searchSection">Find Doctor</a></li>
+          <li class="nav-item"><a class="nav-link" href="#nearbySection">Nearby</a></li>
+          <li class="nav-item"><a class="nav-link" href="#appointmentsSection">Appointments</a></li>
+          <li class="nav-item"><a class="nav-link" href="#favoritesSection">Favorites</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <span id="userName" class="small fw-semibold text-secondary">Patient</span>
+          <button id="logoutButton" class="btn btn-outline-secondary btn-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dashboard-page">
+    <div class="container-fluid dashboard-container py-4 py-lg-5">
+
+      <section class="hero-panel mb-4">
+        <div>
+          <p class="eyebrow mb-1">PATIENT DASHBOARD</p>
+          <h1 class="h2 fw-bold mb-2">Find the right doctor for your care.</h1>
+          <p class="text-secondary mb-0">
+            Search verified doctors by specialization or symptoms, or find doctors nearest to your current location.
+          </p>
+        </div>
+        <div class="hero-stat">
+          <span id="doctorCount">—</span>
+          <small>verified doctors found</small>
+        </div>
+      </section>
+
+      <div id="dashboardMessage" class="alert d-none" role="alert" aria-live="polite"></div>
+
+      <!-- SEARCH -->
+      <section id="searchSection" class="dashboard-card mb-4">
+        <div class="section-heading">
+          <div>
+            <h2 class="h5 fw-bold mb-1">Doctor Search</h2>
+            <p class="text-secondary small mb-0">Search all verified doctors or filter by specialization.</p>
+          </div>
+          <button id="allDoctorsButton" class="btn btn-outline-primary btn-sm">Show all</button>
+        </div>
+
+        <div class="row g-3 search-controls">
+          <div class="col-12 col-lg-5">
+            <label for="specializationInput" class="form-label">Search by specialization</label>
+            <div class="input-group input-group-lg">
+              <input id="specializationInput" class="form-control" type="text"
+                     placeholder="e.g. cardiology" autocomplete="off">
+              <button id="specializationButton" class="btn btn-primary">Search</button>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-7">
+            <label for="symptomInput" class="form-label">Search by symptom</label>
+            <div class="input-group input-group-lg">
+              <input id="symptomInput" class="form-control" type="text"
+                     placeholder="e.g. fever, cough" autocomplete="off">
+              <button id="symptomButton" class="btn btn-primary">Find doctor</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="symptomMatch" class="symptom-match d-none"></div>
+      </section>
+
+      <!-- NEARBY -->
+      <section id="nearbySection" class="dashboard-card mb-4">
+        <div class="section-heading">
+          <div>
+            <h2 class="h5 fw-bold mb-1">Nearest Doctors & Clinics</h2>
+            <p class="text-secondary small mb-0">
+              Uses your  location.
+            </p>
+          </div>
+          <button id="nearbyButton" class="btn btn-primary">
+            <span id="nearbyButtonText">Use my location</span>
+            <span id="nearbySpinner" class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+
+        <div class="location-status" id="locationStatus">
+          Location permission is requested  when you click "Use my location".
+        </div>
+        <div id="nearbyResults" class="doctor-grid"></div>
+
+        <div id="mapPanel" class="map-panel d-none mt-4">
+          <div class="map-heading">
+            <div>
+              <h3 class="h6 fw-bold mb-1">Nearest Clinic Map & Route</h3>
+              <p id="mapSummary" class="small text-secondary mb-0">Allow location access to see the nearest clinic on the map.</p>
+            </div>
+            <a id="routeButton" class="btn btn-success btn-sm disabled" href="#" target="_blank" rel="noopener">
+              Get Directions
+            </a>
+          </div>
+          <div class="map-frame-wrap">
+            <iframe id="clinicMap" title="Nearest MediSlot clinic map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+          <div class="map-attribution">Map data © OpenStreetMap contributors. Route opens in Google Maps.</div>
+        </div>
+      </section>
+
+      <!-- RESULTS -->
+      <section class="dashboard-card mb-4" id="resultsSection">
+        <div class="section-heading">
+          <div>
+            <h2 class="h5 fw-bold mb-1" id="resultsTitle">Verified Doctors</h2>
+            <p class="text-secondary small mb-0" id="resultsSubtitle">Browse doctors available in MediSlot.</p>
+          </div>
+          <div id="resultsCount" class="badge text-bg-light border">0 doctors</div>
+        </div>
+        <div id="doctorResults" class="doctor-grid"></div>
+      </section>
+
+      <!-- APPOINTMENTS / FAVORITES -->
+      <div class="row g-4">
+        <div class="col-12 col-lg-6">
+          <section id="appointmentsSection" class="dashboard-card compact-card">
+            <div class="section-heading mb-2"><div><h2 class="h5 fw-bold mb-1">My Appointments</h2><p class="text-secondary small mb-0">View booked appointments and cancel pending/confirmed appointments.</p></div></div>
+            <div id="appointmentResults" class="appointment-list"></div>
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <section id="favoritesSection" class="dashboard-card compact-card">
+            <div class="section-heading mb-2"><div><h2 class="h5 fw-bold mb-1">Favorite Doctors</h2><p class="text-secondary small mb-0">Manage doctors saved to your favorites.</p></div></div>
+            <div id="favoriteResults" class="favorite-list"></div>
+          </section>        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Rate your appointment</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div id="reviewDoctor" class="fw-semibold mb-3">Doctor</div>
+        <input type="hidden" id="reviewAppointmentId">
+        <label class="form-label">Rating</label>
+        <select id="reviewRating" class="form-select mb-3"><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select>
+        <label class="form-label">Comment <span class="text-secondary">(optional)</span></label>
+        <textarea id="reviewComment" class="form-control" rows="4" maxlength="1000" placeholder="Share your experience"></textarea>
+        <div id="reviewModalMsg" class="alert d-none mt-3 mb-0"></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" id="submitReview" class="btn btn-primary">Submit review</button></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/patient-dashboard.js"></script>
+</body>
+</html>
