@@ -1,0 +1,10 @@
+body{background:#f7f9fc}.card{border:0}.schedule-item,
+.slot-item,
+.appointment-item
+{border:1px solid #e7eaf0;border-radius:.75rem;padding:.75rem;margin-bottom:.65rem;background:#fff}
+.schedule-item{display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+.fixed-min{min-height:140px}.status-pending{background:#fff3cd;color:#664d03}
+.status-confirmed{background:#cff4fc;color:#055160}
+.status-completed{background:#d1e7dd;color:#0f5132;text-align:center;}
+.status-cancelled{background:#f8d7da;color:#842029}
+.empty-state{color:#6c757d;text-align:center;padding:1rem}
