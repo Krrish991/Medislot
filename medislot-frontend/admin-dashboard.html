@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediSlot | Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body class="admin-page">
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-primary" href="admin-dashboard.html">MediSlot</a>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge text-bg-dark">ADMIN</span>
+      <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-4 py-lg-5">
+  <div id="pageAlert" class="alert d-none" role="alert"></div>
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+      <p class="text-primary fw-semibold mb-1">ADMINISTRATION</p>
+      <h1 class="h2 mb-1">Admin Dashboard</h1>
+      <p class="text-secondary mb-0">Manage doctors, clinics and symptom-specialization mappings.</p>
+    </div>
+    <button id="refreshAllBtn" class="btn btn-primary">Refresh Data</button>
+  </div>
+
+  <section class="card admin-card mb-4" id="doctorSection">
+    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div><h2 class="h5 mb-1">Doctor Verification & Management</h2><p class="small text-secondary mb-0">Verify pending doctors or update their professional details.</p></div>
+      <span id="doctorCount" class="badge rounded-pill text-bg-light">0 doctors</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead><tr><th>Doctor</th><th>Specialization</th><th>Qualification</th><th>Experience</th><th>Fee</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="doctorTableBody"><tr><td colspan="7" class="text-center text-secondary py-4">Loading doctors...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card admin-card mb-4" id="clinicSection">
+    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div><h2 class="h5 mb-1">Clinic Management</h2><p class="small text-secondary mb-0">Create, edit or remove clinic locations.</p></div>
+      <button id="addClinicBtn" class="btn btn-success btn-sm">+ Add Clinic</button>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead><tr><th>Clinic</th><th>Address</th><th>City</th><th>Latitude</th><th>Longitude</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="clinicTableBody"><tr><td colspan="6" class="text-center text-secondary py-4">Loading clinics...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card admin-card" id="symptomSection">
+    <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div><h2 class="h5 mb-1">Symptom-Specialization Mapping</h2><p class="small text-secondary mb-0">Maintain keywords used by symptom search.</p></div>
+      <button id="addSymptomBtn" class="btn btn-success btn-sm">+ Add Mapping</button>
+    </div>
+    <div class="card-body">
+      <div class="row g-2 mb-3"><div class="col-md-6"><input id="symptomFilter" class="form-control" placeholder="Filter symptom or specialization..."></div></div>
+      <div class="table-responsive">
+        <table class="table align-middle admin-table mb-0">
+          <thead><tr><th>Symptom Keyword</th><th>Specialization</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="symptomTableBody"><tr><td colspan="3" class="text-center text-secondary py-4">Loading mappings...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="admin-card mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="h5 mb-1">New Doctor Registration Requests</h2>
+            <p class="text-secondary mb-0">
+                Review doctors waiting for admin approval.
+            </p>
+        </div>
+
+        <span class="badge text-bg-primary" id="pendingCount">0</span>
+    </div>
+
+    <div id="pendingMessage"
+         class="alert d-none"
+         role="alert">
+    </div>
+
+    <div id="pendingLoading"
+         class="text-center text-secondary py-4">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        Loading pending doctors...
+    </div>
+
+    <div id="pendingEmpty"
+         class="text-center text-secondary py-4 d-none">
+        No pending doctor registrations.
+    </div>
+
+    <div class="table-responsive d-none"
+         id="pendingTableWrapper">
+
+        <table class="table align-middle admin-table">
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Qualification</th>
+                    <th>Experience</th>
+                    <th>Clinic</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="pendingTableBody"></tbody>
+
+        </table>
+
+    </div>
+</section>
+</main>
+
+<div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+    <form id="doctorForm"><div class="modal-header"><h2 class="modal-title h5">Edit Doctor</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><input type="hidden" id="doctorId">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Name</label><input id="doctorName" class="form-control" disabled></div>
+          <div class="col-md-6"><label class="form-label">Email</label><input id="doctorEmail" class="form-control" disabled></div>
+          <div class="col-md-6"><label class="form-label">Specialization</label><input id="doctorSpecialization" class="form-control" required></div>
+          <div class="col-md-6"><label class="form-label">Qualification</label><input id="doctorQualification" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Experience (years)</label><input id="doctorExperience" type="number" min="0" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Consultation Fee</label><input id="doctorFee" type="number" min="0" step="0.01" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Available Days</label><input id="doctorDays" class="form-control" placeholder="MONDAY,WEDNESDAY"></div>
+        </div>
+      </div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" type="submit">Save Changes</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade" id="clinicModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content"><form id="clinicForm"><div class="modal-header"><h2 class="modal-title h5" id="clinicModalTitle">Add Clinic</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="clinicId"><div class="row g-3">
+      <div class="col-12"><label class="form-label">Clinic Name</label><input id="clinicName" class="form-control" required></div>
+      <div class="col-12"><label class="form-label">Address</label><input id="clinicAddress" class="form-control" required></div>
+      <div class="col-md-6"><label class="form-label">City</label><input id="clinicCity" class="form-control" required></div>
+      <div class="col-md-3"><label class="form-label">Latitude</label><input id="clinicLatitude" type="number" step="any" class="form-control"></div>
+      <div class="col-md-3"><label class="form-label">Longitude</label><input id="clinicLongitude" type="number" step="any" class="form-control"></div>
+    </div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success" type="submit">Save Clinic</button></div>
+  </form></div></div>
+</div>
+
+<div class="modal fade" id="symptomModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content"><form id="symptomForm"><div class="modal-header"><h2 class="modal-title h5" id="symptomModalTitle">Add Symptom Mapping</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body"><input type="hidden" id="symptomId"><div class="mb-3"><label class="form-label">Symptom Keyword</label><input id="symptomKeyword" class="form-control" required maxlength="100"></div><div><label class="form-label">Specialization</label><input id="symptomSpecialization" class="form-control" required maxlength="100"></div></div>
+    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success" type="submit" id="symptomSubmitBtn">Add Mapping</button></div>
+  </form></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/admin-dashboard.js"></script>
+<script src="js/pending-doctors.js"></script>
+</body>
+</html>
