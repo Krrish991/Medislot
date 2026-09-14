@@ -1,0 +1,128 @@
+# MediSlot Frontend — Steps 1 & 2
+
+## Technologies
+- HTML5
+- CSS3
+- JavaScript (ES6)
+- Bootstrap 5.3
+
+No React, Angular, Vue, Tailwind, jQuery or other frontend framework is used.
+
+## Step 1
+### Login
+`login.html`
+
+Backend:
+- `POST http://localhost:8080/api/auth/login`
+
+The returned backend User object is stored in sessionStorage for the current browser session.
+Role routing is prepared for:
+- PATIENT -> patient-dashboard.html
+- DOCTOR -> doctor-dashboard.html
+- ADMIN -> admin-dashboard.html
+
+## Step 2
+### Registration
+`register.html`
+
+Actual backend APIs:
+- `GET http://localhost:8080/api/clinics`
+- `POST http://localhost:8080/api/auth/register`
+
+### Patient registration
+Sends:
+- name
+- email
+- password
+- role = PATIENT
+
+The backend then creates the User and a Patient record.
+
+### Doctor registration
+Sends:
+- name
+- email
+- password
+- role = DOCTOR
+- clinicId
+- specialization
+- qualification (if entered)
+- experienceYears (if entered)
+- consultationFee (if entered)
+
+The clinic dropdown is populated from the backend instead of using hard-coded clinic data.
+
+The backend creates a Doctor with `verified = false`; administrator verification will be implemented in the Admin frontend step.
+
+## Password validation
+The frontend requires:
+- 8+ characters
+- uppercase
+- lowercase
+- number
+- special character
+
+This is client-side validation. The current backend only checks that the password is not blank, so this stronger policy is enforced before sending the request but does not modify the backend.
+
+## Run
+1. Start the Spring Boot backend on port 8080.
+2. Start the frontend with VS Code Live Server (recommended).
+3. Open `login.html`.
+4. Use "Create an account" to open registration.
+
+## Stable refresh layout
+The pages use Bootstrap's grid/normal document flow, explicit minimum heights, reserved spacing and responsive breakpoints. There are no content-dependent absolute layouts for the main forms, so refreshing the page should not cause the form controls to jump around.
+
+
+## Step 3 — Patient Dashboard
+
+Connected backend endpoints:
+- GET /api/doctors
+- GET /api/doctors?spec=...
+- GET /api/symptoms/search?q=...
+- GET /api/doctors/nearest?lat=...&lng=...
+- Doctor cards are prepared for the backend's `availableToday` endpoint through the nearest response.
+
+The dashboard includes:
+- Verified doctor listing
+- Specialization search
+- Symptom-based search
+- Browser geolocation for nearest-doctor search
+- Distance display from the backend's Haversine calculation
+- Available-today badge for nearest results
+- Responsive Bootstrap navigation
+- Logout
+- Stable responsive card layout
+
+### Backend limitation verified during Step 3
+
+The current backend login endpoint returns only the `User` entity. The patient-specific endpoints require `Patient.id`:
+- GET /api/appointments/patient/{patientId}
+- GET /api/favorites/patient/{patientId}
+- POST /api/favorites with patientId
+- DELETE /api/favorites?patientId=...&doctorId=...
+
+There is currently no backend endpoint that converts the logged-in `User.id` into the corresponding `Patient.id`.
+
+Therefore Step 3 does NOT invent or hard-code a Patient ID. Appointment/favorite functionality is reserved for the next steps and should be connected after a real Patient-ID handoff is available. This keeps the frontend honest to the supplied backend.
+
+## Step 4 — Doctor Profile, Schedule, Reviews, Slots & Booking
+
+Added `doctor-profile.html` with real backend integration for:
+- GET `/api/doctors/{id}`
+- GET `/api/doctors/{id}/available-today`
+- GET `/api/schedules/doctor/{id}`
+- GET `/api/slots/doctor/{id}?date=YYYY-MM-DD`
+- GET `/api/reviews/doctor/{id}`
+- POST `/api/appointments`
+
+The booking request is `{patientId, doctorId, slotId, reason}`. The frontend does not invent a Patient ID; booking is blocked if the current login/session data does not contain a real `patientId`.
+
+
+## Step 6 — Reviews & Ratings
+- Added patient review flow for COMPLETED appointments.
+- POST `/api/reviews` with `{appointmentId, rating, comment}`.
+- Doctor profile continues to load real reviews and calculated average via GET `/api/reviews/doctor/{doctorId}`.
+- Review form is shown only for completed appointments.
+- The frontend does not invent a Patient ID.
+- Note: the current backend does not expose an endpoint to check whether a completed appointment already has a review, so the UI cannot reliably prevent duplicate submissions.
