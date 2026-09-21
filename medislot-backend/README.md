@@ -1,31 +1,28 @@
 # MediSlot Backend — Spring Boot REST API
 
 Doctor Appointment Management System backend. Java 21 + Spring Boot 3.2 +
-Spring Data JPA + MySQL 8.0. Pure REST API. Meant to be
+Spring Data JPA + PostgreSQL. Pure REST API. Meant to be
 called from a separate static HTML/CSS/JS frontend.
 
 ## 1. Prerequisites
 
 - JDK 21 installed
 - Maven 
-- MySQL Server 8.0 running
+- PostgreSQL 16+ running (or a Render Postgres database)
 
 ## 2. Setup Steps
 
 1. **Open this folder in VS Code** 
-2. Open `src/main/resources/application.properties` and change:
-   ```
-   spring.datasource.password=YOUR_MYSQL_PASSWORD
-   ```
-   to your actual MySQL root password.
-3. You do **not** need to manually create the database — `createDatabaseIfNotExist=true`
-   in the connection URL will create `medislot_db` automatically. Tables are
-   also auto-created by Hibernate (`ddl-auto=update`) the first time you run the app.
+2. Create a PostgreSQL database named `medislot_db`, then provide its
+   connection settings with `SPRING_DATASOURCE_URL`,
+   `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`.
+3. Tables are auto-created by Hibernate (`ddl-auto=update`) the first time you
+   run the app.
 4. **Run the app**:
    - In VS Code terminal: `mvn spring-boot:run`
    - Or use the "Run" button above `main()` in `MedislotBackendApplication.java`
 5. Once you see `Tomcat started on port(s): 8080`, the backend is live.
-6. (Optional) Load sample test data: open MySQL Workbench and run `sample-data.sql`
+6. (Optional) Load sample test data with `psql` and `sample-data.sql`
    — this adds 4 real clinics (Thane, Dadar, Borivali, Mulund) with actual
    coordinates so you can test the nearest-doctor map feature immediately.
 

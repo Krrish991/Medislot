@@ -4,8 +4,6 @@
 -- already auto-created the tables via ddl-auto=update).
 -- ============================================================
 
-USE medislot_db;
-
 -- Clinics with real Mumbai-area coordinates, to test the
 -- "nearest doctor" map feature.
 INSERT INTO clinics (name, address, city, latitude, longitude) VALUES
