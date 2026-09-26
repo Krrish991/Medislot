@@ -2,6 +2,8 @@ package com.medislot.backend.config;
 
 import com.medislot.backend.entity.User;
 import com.medislot.backend.repository.UserRepository;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,8 @@ public class AdminSeeder implements CommandLineRunner {
             admin.setName("MediSlot Admin");
             admin.setEmail(adminEmail);
             admin.setPassword("admin123"); 
+            admin.setSecurityQuestion("What is the default administrator answer?");
+            admin.setSecurityAnswer(hashAnswer("admin"));
             admin.setRole(User.Role.ADMIN);
             userRepository.save(admin);
 
@@ -32,6 +36,20 @@ public class AdminSeeder implements CommandLineRunner {
             System.out.println("   email:    " + adminEmail);
             System.out.println("   password: admin123");
             System.out.println("=================================================");
+        }
+    }
+
+    private String hashAnswer(String answer) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(answer.trim().toLowerCase().getBytes(StandardCharsets.UTF_8));
+            StringBuilder result = new StringBuilder();
+            for (byte value : digest) {
+                result.append(String.format("%02x", value));
+            }
+            return result.toString();
+        } catch (Exception exception) {
+            throw new IllegalStateException("Could not create the default admin account", exception);
         }
     }
 }
