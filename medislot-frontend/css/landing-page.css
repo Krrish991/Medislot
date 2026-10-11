@@ -1883,9 +1883,6 @@ h1, h2, h3, h4, h5, h6 {
   .booking-grid { grid-template-columns: 1fr; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .reviews-grid { grid-template-columns: repeat(2, 1fr); }
-  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
-  .pricing-card.featured { transform: scale(1); }
-  .pricing-card.featured:hover { transform: translateY(-4px); }
   .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -1919,7 +1916,6 @@ h1, h2, h3, h4, h5, h6 {
   .specialties-grid { grid-template-columns: repeat(2, 1fr); }
   .doctors-grid { grid-template-columns: 1fr; }
   .reviews-grid { grid-template-columns: 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
   .footer-grid { grid-template-columns: 1fr; gap: 32px; }
   .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   
