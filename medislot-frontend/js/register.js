@@ -336,12 +336,12 @@ registerForm.addEventListener("submit", async (event) => {
 
     if (isDoctor()) {
       showMessage(
-        `Doctor account created successfully. Your Doctor ID is ${generatedId}. Please save this ID. Your account is pending administrator verification. Redirecting to login...`,
+        `Doctor account created successfully. Your Doctor ID is ${generatedId}. Please save this ID. Your account is pending administrator verification. Check your email for the verification code. Redirecting...`,
         "success"
       );
     } else {
       showMessage(
-        `Patient account created successfully. Your Patient ID is ${generatedId}. Please save this ID. Redirecting to login...`,
+        `Patient account created successfully. Your Patient ID is ${generatedId}. Please save this ID. Check your email for the verification code. Redirecting...`,
         "success"
       );
     }
@@ -352,7 +352,7 @@ registerForm.addEventListener("submit", async (event) => {
     updatePasswordRuleUI();
 
     setTimeout(() => {
-      window.location.href = "login.html";
+      window.location.href = "verify-email.html?email=" + encodeURIComponent(data.email);
     }, 1200);
 
   } catch (error) {

@@ -109,6 +109,10 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     if (!response.ok) {
+      if (data && data.message === "EMAIL_NOT_VERIFIED") {
+        window.location.href = "verify-email.html?email=" + encodeURIComponent(payload.email);
+        return;
+      }
       const backendMessage =
         data && typeof data.message === "string"
           ? data.message

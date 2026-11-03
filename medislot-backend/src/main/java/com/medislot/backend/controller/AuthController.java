@@ -5,6 +5,8 @@ import com.medislot.backend.dto.LoginRequest;
 import com.medislot.backend.dto.ResetPasswordRequest;
 import com.medislot.backend.dto.RegisterRequest;
 import com.medislot.backend.dto.AuthResponse;
+import com.medislot.backend.dto.VerifyEmailRequest;
+import com.medislot.backend.dto.ResendCodeRequest;
 import com.medislot.backend.entity.User;
 import com.medislot.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -61,6 +63,26 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        try {
+            authService.verifyEmail(request);
+            return ResponseEntity.ok(new MessageResponse("Email verified successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-code")
+    public ResponseEntity<?> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+        try {
+            authService.resendCode(request.getEmail());
+            return ResponseEntity.ok(new MessageResponse("A new code has been sent"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }
     }
 

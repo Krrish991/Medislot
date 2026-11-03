@@ -5,6 +5,7 @@ import com.medislot.backend.dto.LoginRequest;
 import com.medislot.backend.dto.RegisterRequest;
 import com.medislot.backend.dto.AuthResponse;
 import com.medislot.backend.dto.ResetPasswordRequest;
+import com.medislot.backend.dto.VerifyEmailRequest;
 import com.medislot.backend.entity.*;
 import com.medislot.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -20,6 +23,8 @@ public class AuthService {
     @Autowired private PatientRepository patientRepository;
     @Autowired private DoctorRepository doctorRepository;
     @Autowired private ClinicRepository clinicRepository;
+    @Autowired private EmailService emailService;
+    private final SecureRandom random = new SecureRandom();
 
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByEmail(req.getEmail())) {
@@ -33,6 +38,10 @@ public class AuthService {
         user.setSecurityQuestion(req.getSecurityQuestion());
         user.setSecurityAnswer(hashAnswer(req.getSecurityAnswer()));
         user.setRole(User.Role.valueOf(req.getRole().toUpperCase()));
+        user.setEmailVerified(false);
+        user.setVerificationCode(newCode());
+        user.setVerificationExpiry(LocalDateTime.now().plusMinutes(10));
+        user.setVerificationAttempts(0);
         User savedUser = userRepository.save(user);
 
         Long patientId = null;
@@ -59,6 +68,11 @@ public class AuthService {
             doctorId = savedDoctor.getId();
         }
 
+        try {
+            emailService.sendVerificationCode(savedUser.getEmail(), savedUser.getName(), savedUser.getVerificationCode());
+        } catch (RuntimeException e) {
+            System.err.println("Could not send verification email: " + e.getMessage());
+        }
         return toAuthResponse(savedUser, patientId, doctorId);
     }
 
@@ -106,6 +120,9 @@ public class AuthService {
         if (!user.getPassword().equals(req.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
+        if (!user.isEmailVerified()) {
+            throw new RuntimeException("EMAIL_NOT_VERIFIED");
+        }
         Long patientId = null;
         Long doctorId = null;
         if (user.getRole() == User.Role.PATIENT) {
@@ -118,6 +135,58 @@ public class AuthService {
                     .getId();
         }
         return toAuthResponse(user, patientId, doctorId);
+    }
+
+    public void verifyEmail(VerifyEmailRequest req) {
+        User user = userRepository.findByEmail(req.getEmail().trim())
+                .orElseThrow(() -> new RuntimeException("No account was found with this email"));
+
+        if (user.isEmailVerified()) return;
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getVerificationCode() == null || user.getVerificationExpiry() == null
+                || now.isAfter(user.getVerificationExpiry())) {
+            throw new RuntimeException("Code expired. Please request a new one");
+        }
+        if (user.getVerificationAttempts() >= 5) {
+            throw new RuntimeException("Too many wrong attempts. Please request a new code");
+        }
+
+        boolean matches = MessageDigest.isEqual(
+                req.getCode().trim().getBytes(StandardCharsets.UTF_8),
+                user.getVerificationCode().getBytes(StandardCharsets.UTF_8));
+        if (!matches) {
+            user.setVerificationAttempts(user.getVerificationAttempts() + 1);
+            userRepository.save(user);
+            throw new RuntimeException("Incorrect code");
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationCode(null);
+        user.setVerificationExpiry(null);
+        user.setVerificationAttempts(0);
+        userRepository.save(user);
+    }
+
+    public void resendCode(String email) {
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() -> new RuntimeException("No account was found with this email"));
+        if (user.isEmailVerified()) throw new RuntimeException("Email is already verified");
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getVerificationExpiry() != null && now.isBefore(user.getVerificationExpiry().minusMinutes(9))) {
+            throw new RuntimeException("Please wait a minute before requesting another code");
+        }
+
+        user.setVerificationCode(newCode());
+        user.setVerificationExpiry(now.plusMinutes(10));
+        user.setVerificationAttempts(0);
+        userRepository.save(user);
+        emailService.sendVerificationCode(user.getEmail(), user.getName(), user.getVerificationCode());
+    }
+
+    private String newCode() {
+        return String.format("%06d", random.nextInt(1_000_000));
     }
 
     private AuthResponse toAuthResponse(User user, Long patientId, Long doctorId) {
