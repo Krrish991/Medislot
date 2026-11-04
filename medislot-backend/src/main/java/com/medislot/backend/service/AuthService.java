@@ -123,6 +123,10 @@ public class AuthService {
         if (!user.isEmailVerified()) {
             throw new RuntimeException("EMAIL_NOT_VERIFIED");
         }
+        return buildLoginResponse(user);
+    }
+
+    private AuthResponse buildLoginResponse(User user) {
         Long patientId = null;
         Long doctorId = null;
         if (user.getRole() == User.Role.PATIENT) {
@@ -130,9 +134,13 @@ public class AuthService {
                     .orElseThrow(() -> new RuntimeException("Patient profile not found"))
                     .getId();
         } else if (user.getRole() == User.Role.DOCTOR) {
-            doctorId = doctorRepository.findByUserId(user.getId())
-                    .orElseThrow(() -> new RuntimeException("Doctor profile not found"))
-                    .getId();
+            Doctor doctor = doctorRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new RuntimeException("Doctor profile not found"));
+            if (!Boolean.TRUE.equals(doctor.getVerified())) {
+                throw new RuntimeException(
+                        "Your account is pending admin approval. You can log in once the admin verifies your profile.");
+            }
+            doctorId = doctor.getId();
         }
         return toAuthResponse(user, patientId, doctorId);
     }
