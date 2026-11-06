@@ -8,7 +8,7 @@ public class MedislotBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(MedislotBackendApplication.class, args);
         System.out.println("=================================================");
-        System.out.println(" MediSlot backend running at http://localhost:8080");
+        System.out.println(" MediSlot backend running ");
         System.out.println("=================================================");
     }
 }
