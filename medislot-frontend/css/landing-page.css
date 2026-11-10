@@ -270,6 +270,22 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(0);
 }
 
+.btn-signin {
+  background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.25);
+}
+
+.btn-signin:hover {
+  background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.35);
+}
+
+.btn-signin:active {
+  transform: translateY(0);
+}
+
 .btn-outline {
   background: white;
   color: var(--navy);
