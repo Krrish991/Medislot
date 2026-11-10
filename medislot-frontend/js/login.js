@@ -1,13 +1,4 @@
-/*
- * MediSlot Step 1 — Login
- * Backend endpoint:
- * POST http://localhost:8080/api/auth/login
- * Body: { email, password }
- *
- * The current backend returns the User object directly.
- * No JWT is currently implemented in the backend, so this frontend stores
- * the returned user in sessionStorage for the current browser session.
- */
+
 
 const API_BASE_URL = ["localhost", "127.0.0.1"].includes(window.location.hostname) ? "http://localhost:8080" : "";
 
@@ -34,6 +25,41 @@ function setLoading(isLoading) {
   loginButton.disabled = isLoading;
   buttonText.textContent = isLoading ? "Signing in..." : "Login";
   buttonSpinner.classList.toggle("d-none", !isLoading);
+}
+
+function completeLogin(data) {
+  // Backend returns user data plus the patient's/doctor's actual database ID.
+  sessionStorage.setItem("medislotUser", JSON.stringify(data));
+  sessionStorage.removeItem("medislotPatientId");
+  sessionStorage.removeItem("medislotDoctorId");
+
+  const role = String(data.role || "").toUpperCase();
+  if (role === "PATIENT" && data.patientId) {
+    sessionStorage.setItem("medislotPatientId", String(data.patientId));
+  }
+  if (role === "DOCTOR" && data.doctorId) {
+    sessionStorage.setItem("medislotDoctorId", String(data.doctorId));
+  }
+
+  const accountId = role === "PATIENT" ? data.patientId : role === "DOCTOR" ? data.doctorId : data.userId;
+  const idText = accountId ? ` Your ${role === "PATIENT" ? "Patient" : role === "DOCTOR" ? "Doctor" : "User"} ID is ${accountId}.` : "";
+  showMessage(`Login successful. Welcome, ${data.name || "User"}!${idText}`, "success");
+
+  /*
+   * Dashboard pages will be added step-by-step.
+   * For now, keep the login page stable and show the detected role.
+   */
+  setTimeout(() => {
+    if (role === "PATIENT") {
+      window.location.href = "patient-dashboard.html";
+    } else if (role === "DOCTOR") {
+      window.location.href = "doctor-dashboard.html";
+    } else if (role === "ADMIN") {
+      window.location.href = "admin-dashboard.html";
+    } else {
+      showMessage("Login succeeded, but the account role is not recognized.", "warning");
+    }
+  }, 500);
 }
 
 function validateForm() {
@@ -122,38 +148,7 @@ loginForm.addEventListener("submit", async (event) => {
       return;
     }
 
-    // Backend returns user data plus the patient's/doctor's actual database ID.
-    sessionStorage.setItem("medislotUser", JSON.stringify(data));
-    sessionStorage.removeItem("medislotPatientId");
-    sessionStorage.removeItem("medislotDoctorId");
-
-    const role = String(data.role || "").toUpperCase();
-    if (role === "PATIENT" && data.patientId) {
-      sessionStorage.setItem("medislotPatientId", String(data.patientId));
-    }
-    if (role === "DOCTOR" && data.doctorId) {
-      sessionStorage.setItem("medislotDoctorId", String(data.doctorId));
-    }
-
-    const accountId = role === "PATIENT" ? data.patientId : role === "DOCTOR" ? data.doctorId : data.userId;
-    const idText = accountId ? ` Your ${role === "PATIENT" ? "Patient" : role === "DOCTOR" ? "Doctor" : "User"} ID is ${accountId}.` : "";
-    showMessage(`Login successful. Welcome, ${data.name || "User"}!${idText}`, "success");
-
-    /*
-     * Dashboard pages will be added step-by-step.
-     * For now, keep the login page stable and show the detected role.
-     */
-    setTimeout(() => {
-      if (role === "PATIENT") {
-        window.location.href = "patient-dashboard.html";
-      } else if (role === "DOCTOR") {
-        window.location.href = "doctor-dashboard.html";
-      } else if (role === "ADMIN") {
-        window.location.href = "admin-dashboard.html";
-      } else {
-        showMessage("Login succeeded, but the account role is not recognized.", "warning");
-      }
-    }, 500);
+    completeLogin(data);
 
   } catch (error) {
     console.error("MediSlot login error:", error);
@@ -165,3 +160,37 @@ loginForm.addEventListener("submit", async (event) => {
     setLoading(false);
   }
 });
+
+const GOOGLE_CLIENT_ID = "633465237171-fkdv91r4t1mrfl8f4psni75a9f5433hm.apps.googleusercontent.com";
+window.addEventListener("load", () => {
+  if (!window.google) return;
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential });
+  google.accounts.id.renderButton(document.getElementById("googleBtn"),
+    { theme: "outline", size: "large", width: 320, text: "continue_with" });
+});
+
+async function onGoogleCredential(resp) {
+  clearMessage();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: resp.credential })
+    });
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (_) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      showMessage(data?.message || "Google sign-in failed.", "danger");
+      return;
+    }
+    completeLogin(data);
+  } catch (error) {
+    showMessage("Cannot connect to MediSlot backend.", "danger");
+  }
+}

@@ -8,13 +8,20 @@ import com.medislot.backend.dto.ResetPasswordRequest;
 import com.medislot.backend.dto.VerifyEmailRequest;
 import com.medislot.backend.entity.*;
 import com.medislot.backend.repository.*;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -24,7 +31,61 @@ public class AuthService {
     @Autowired private DoctorRepository doctorRepository;
     @Autowired private ClinicRepository clinicRepository;
     @Autowired private EmailService emailService;
+    @Value("${google.client-id:}")
+    private String googleClientId;
     private final SecureRandom random = new SecureRandom();
+
+    public AuthResponse googleLogin(String credential) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            throw new RuntimeException("Google login is not configured");
+        }
+
+        GoogleIdToken idToken;
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                    .setAudience(List.of(googleClientId))
+                    .build();
+            idToken = verifier.verify(credential);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not verify Google sign-in");
+        }
+        if (idToken == null) {
+            throw new RuntimeException("Invalid Google sign-in");
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        if (!Boolean.TRUE.equals(payload.getEmailVerified())) {
+            throw new RuntimeException("Your Google email is not verified");
+        }
+
+        String email = payload.getEmail();
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            Object tokenName = payload.get("name");
+            User newUser = new User();
+            newUser.setName(tokenName instanceof String name && !name.isBlank() ? name : email);
+            newUser.setEmail(email);
+            newUser.setPassword(UUID.randomUUID().toString());
+            newUser.setSecurityQuestion("Signed up with Google");
+            newUser.setSecurityAnswer(hashAnswer(UUID.randomUUID().toString()));
+            newUser.setRole(User.Role.PATIENT);
+            newUser.setEmailVerified(true);
+            user = userRepository.save(newUser);
+
+            Patient patient = new Patient();
+            patient.setUser(user);
+            patientRepository.save(patient);
+        } else if (!user.isEmailVerified()) {
+            user.setEmailVerified(true);
+            user.setVerificationCode(null);
+            user.setVerificationExpiry(null);
+            user.setVerificationAttempts(0);
+            user = userRepository.save(user);
+        }
+
+        return buildLoginResponse(user);
+    }
 
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByEmail(req.getEmail())) {

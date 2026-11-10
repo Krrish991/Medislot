@@ -7,6 +7,7 @@ import com.medislot.backend.dto.RegisterRequest;
 import com.medislot.backend.dto.AuthResponse;
 import com.medislot.backend.dto.VerifyEmailRequest;
 import com.medislot.backend.dto.ResendCodeRequest;
+import com.medislot.backend.dto.GoogleLoginRequest;
 import com.medislot.backend.entity.User;
 import com.medislot.backend.service.AuthService;
 import jakarta.validation.Valid;
@@ -60,6 +61,16 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             AuthResponse response = authService.login(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        try {
+            AuthResponse response = authService.googleLogin(request.getCredential());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));
