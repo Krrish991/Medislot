@@ -70,7 +70,7 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
         try {
-            AuthResponse response = authService.googleLogin(request.getCredential());
+            AuthResponse response = authService.googleLogin(request.getAccessToken());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage()));

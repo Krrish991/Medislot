@@ -162,20 +162,40 @@ loginForm.addEventListener("submit", async (event) => {
 });
 
 const GOOGLE_CLIENT_ID = "633465237171-fkdv91r4t1mrfl8f4psni75a9f5433hm.apps.googleusercontent.com";
-window.addEventListener("load", () => {
-  if (!window.google) return;
-  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential });
-  google.accounts.id.renderButton(document.getElementById("googleBtn"),
-    { theme: "outline", size: "large", width: 320, text: "continue_with" });
+let googleTokenClient = null;
+
+function initGoogleTokenClient() {
+  if (!window.google || !google.accounts || !google.accounts.oauth2) return false;
+  googleTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: "openid email profile",
+    prompt: "select_account",
+    callback: onGoogleToken,
+    error_callback: () => showMessage("Google sign-in was cancelled.", "warning")
+  });
+  return true;
+}
+
+document.getElementById("googleLoginBtn").addEventListener("click", () => {
+  clearMessage();
+  if (!googleTokenClient && !initGoogleTokenClient()) {
+    showMessage("Google sign-in is still loading. Please try again.", "warning");
+    return;
+  }
+  googleTokenClient.requestAccessToken({ prompt: "select_account" });
 });
 
-async function onGoogleCredential(resp) {
-  clearMessage();
+async function onGoogleToken(resp) {
+  if (!resp || resp.error || !resp.access_token) {
+    showMessage("Google sign-in failed.", "danger");
+    return;
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential: resp.credential })
+      body: JSON.stringify({ accessToken: resp.access_token })
     });
 
     let data = null;

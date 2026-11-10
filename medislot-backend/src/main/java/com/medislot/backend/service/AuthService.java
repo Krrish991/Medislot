@@ -8,19 +8,21 @@ import com.medislot.backend.dto.ResetPasswordRequest;
 import com.medislot.backend.dto.VerifyEmailRequest;
 import com.medislot.backend.entity.*;
 import com.medislot.backend.repository.*;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,37 +36,69 @@ public class AuthService {
     @Value("${google.client-id:}")
     private String googleClientId;
     private final SecureRandom random = new SecureRandom();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public AuthResponse googleLogin(String credential) {
+    public AuthResponse googleLogin(String accessToken) {
         if (googleClientId == null || googleClientId.isBlank()) {
             throw new RuntimeException("Google login is not configured");
         }
 
-        GoogleIdToken idToken;
+        String email;
+        String name;
         try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                    new NetHttpTransport(), GsonFactory.getDefaultInstance())
-                    .setAudience(List.of(googleClientId))
+            String encodedToken = URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+            HttpRequest tokenInfoRequest = HttpRequest.newBuilder()
+                    .uri(URI.create("https://oauth2.googleapis.com/tokeninfo?access_token=" + encodedToken))
                     .build();
-            idToken = verifier.verify(credential);
+            HttpResponse<String> tokenInfoResponse = httpClient.send(
+                    tokenInfoRequest, HttpResponse.BodyHandlers.ofString());
+            if (tokenInfoResponse.statusCode() < 200 || tokenInfoResponse.statusCode() >= 300) {
+                throw new RuntimeException("Invalid Google sign-in");
+            }
+
+            JsonNode tokenInfo = objectMapper.readTree(tokenInfoResponse.body());
+            String audience = tokenInfo.path("aud").asText("");
+            String authorizedParty = tokenInfo.path("azp").asText("");
+            if (!googleClientId.equals(audience) && !googleClientId.equals(authorizedParty)) {
+                throw new RuntimeException("Invalid Google sign-in");
+            }
+
+            email = tokenInfo.path("email").asText("");
+            JsonNode emailVerified = tokenInfo.get("email_verified");
+            boolean isEmailVerified = emailVerified != null
+                    && (emailVerified.isBoolean() && emailVerified.booleanValue()
+                    || emailVerified.isTextual() && "true".equalsIgnoreCase(emailVerified.textValue()));
+            if (email.isBlank() || !isEmailVerified) {
+                throw new RuntimeException("Your Google email is not verified");
+            }
+
+            name = email;
+            try {
+                HttpRequest userInfoRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("https://www.googleapis.com/oauth2/v3/userinfo"))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .GET()
+                        .build();
+                HttpResponse<String> userInfoResponse = httpClient.send(
+                        userInfoRequest, HttpResponse.BodyHandlers.ofString());
+                if (userInfoResponse.statusCode() >= 200 && userInfoResponse.statusCode() < 300) {
+                    String returnedName = objectMapper.readTree(userInfoResponse.body()).path("name").asText("");
+                    if (!returnedName.isBlank()) name = returnedName;
+                }
+            } catch (Exception ignored) {
+                // Userinfo is optional; the verified email is a safe fallback name.
+            }
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Could not verify Google sign-in");
-        }
-        if (idToken == null) {
-            throw new RuntimeException("Invalid Google sign-in");
+            throw new RuntimeException("Could not verify Google sign-in", e);
         }
 
-        GoogleIdToken.Payload payload = idToken.getPayload();
-        if (!Boolean.TRUE.equals(payload.getEmailVerified())) {
-            throw new RuntimeException("Your Google email is not verified");
-        }
-
-        String email = payload.getEmail();
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
-            Object tokenName = payload.get("name");
             User newUser = new User();
-            newUser.setName(tokenName instanceof String name && !name.isBlank() ? name : email);
+            newUser.setName(name);
             newUser.setEmail(email);
             newUser.setPassword(UUID.randomUUID().toString());
             newUser.setSecurityQuestion("Signed up with Google");
